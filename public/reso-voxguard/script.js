@@ -228,29 +228,32 @@ const POL={safe:["allow","ALLOW: call continues normally."],sus:["mfa","STEP-UP 
 function pol(b){const changed=lastBand&&lastBand!==b;document.querySelectorAll("#pol span").forEach(s=>s.classList.toggle("on",s.dataset.p===POL[b][0]));$("polTxt").textContent=POL[b][1];if(changed){const p=$("pol");p.classList.remove("policy-change");void p.offsetWidth;p.classList.add("policy-change");setTimeout(()=>p.classList.remove("policy-change"),850);if(b!=="safe")toast(POL[b][1])}}
 $("theme").onclick=()=>{const h=document.documentElement,light=h.dataset.theme!=="light";h.dataset.theme=light?"light":"dark";$("themeIcon").innerHTML=light?'<path d="M20.5 15.5A8.5 8.5 0 0 1 8.5 3.5 8.5 8.5 0 1 0 20.5 15.5Z"/>':'<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/>';$ ("theme").setAttribute("aria-label",light?"Switch to dark theme":"Switch to light theme");if(peaks.length)draw();drawTrend();if(utlVals.length)drawUtl(utlVals)};
 renderHist();ping();
-if("serviceWorker" in navigator && location.protocol!=="file:")navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
-let installEvent=null;
-const installButton=$("installApp"),installMessage=$("installMessage"),iosDevice=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream;
-function isInstalled(){return window.matchMedia("(display-mode: standalone)").matches||navigator.standalone===true}
-function closeInstallPrompt(){$("installPrompt").hidden=true;$("sessionStart").focus()}
-function updateInstallMessage(){
-  if(isInstalled()){installButton.textContent="App is installed";installButton.disabled=true;installMessage.textContent="Reso VoxGuard is already on your home screen.";return}
-  installMessage.textContent=iosDevice?"On iPhone or iPad: tap Share in Safari, then choose Add to Home Screen.":"Tap Install app, or choose Install app / Add to Home Screen from your browser menu.";
+if("serviceWorker" in navigator && location.protocol!=="file:")navigator.serviceWorker.register("./service-worker.js",{updateViaCache:"none"}).catch(()=>{});
+const installDialog=$("installPrompt"),installButton=$("installApp"),installMessage=$("installMessage");
+if(installDialog&&installButton&&installMessage){
+  let installEvent=null;
+  const iosDevice=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream;
+  function isInstalled(){return window.matchMedia("(display-mode: standalone)").matches||navigator.standalone===true}
+  function closeInstallPrompt(){installDialog.hidden=true;$("sessionStart")?.focus()}
+  function updateInstallMessage(){
+    if(isInstalled()){installButton.textContent="App is installed";installButton.disabled=true;installMessage.textContent="Reso VoxGuard is already on your home screen.";return}
+    installMessage.textContent=iosDevice?"On iPhone or iPad: tap Share in Safari, then choose Add to Home Screen.":"Tap Install app, or choose Install app / Add to Home Screen from your browser menu.";
+  }
+  installDialog.addEventListener("keydown",e=>{if(e.key!=="Tab")return;const controls=Array.from(installDialog.querySelectorAll("button:not([disabled])")),first=controls[0],last=controls[controls.length-1];if(!first||!last)return;if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}});
+  $("installClose")?.addEventListener("click",closeInstallPrompt);
+  $("installContinue")?.addEventListener("click",closeInstallPrompt);
+  window.addEventListener("keydown",e=>{if(e.key==="Escape"&&!installDialog.hidden)closeInstallPrompt()});
+  window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();installEvent=e;installMessage.textContent="Ready to install. Tap Install app to add VoxGuard to your phone."});
+  installButton.addEventListener("click",async()=>{
+    if(isInstalled()){updateInstallMessage();return}
+    if(!installEvent){updateInstallMessage();return}
+    const promptEvent=installEvent;installEvent=null;await promptEvent.prompt();const {outcome}=await promptEvent.userChoice;
+    if(outcome==="accepted")closeInstallPrompt();else installMessage.textContent="Installation was cancelled. You can try again from your browser menu.";
+  });
+  window.addEventListener("appinstalled",()=>{installEvent=null;updateInstallMessage();closeInstallPrompt()});
+  updateInstallMessage();
+  window.addEventListener("load",()=>setTimeout(()=>{installDialog.hidden=false;installButton.focus()},1100),{once:true});
 }
-$("installPrompt").addEventListener("keydown",e=>{if(e.key!=="Tab")return;const controls=Array.from($("installPrompt").querySelectorAll("button:not([disabled])")),first=controls[0],last=controls[controls.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}});
-$("installClose").onclick=closeInstallPrompt;
-$("installContinue").onclick=closeInstallPrompt;
-window.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("installPrompt").hidden)closeInstallPrompt()});
-window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();installEvent=e;installMessage.textContent="Ready to install. Tap Install app to add VoxGuard to your phone."});
-installButton.onclick=async()=>{
-  if(isInstalled()){updateInstallMessage();return}
-  if(!installEvent){updateInstallMessage();return}
-  const promptEvent=installEvent;installEvent=null;await promptEvent.prompt();const {outcome}=await promptEvent.userChoice;
-  if(outcome==="accepted")closeInstallPrompt();else installMessage.textContent="Installation was cancelled. You can try again from your browser menu.";
-};
-window.addEventListener("appinstalled",()=>{installEvent=null;updateInstallMessage();closeInstallPrompt()});
-updateInstallMessage();
-window.addEventListener("load",()=>setTimeout(()=>{$("installPrompt").hidden=false;$("installApp").focus()},1100),{once:true});
 
 
 

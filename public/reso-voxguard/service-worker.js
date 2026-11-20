@@ -1,8 +1,8 @@
-const CACHE_NAME = "reso-voxguard-v1"
+const CACHE_NAME = "reso-voxguard-v2"
 const APP_FILES = [
   "./index.html",
-  "./style.css",
-  "./script.js",
+  "./style.css?v=2",
+  "./script.js?v=2",
   "./manifest.webmanifest",
   "./icon.svg",
   "./icon-192.png",
