@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050506">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="icon" href="./icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>Reso VoxGuard: AI voice clone detector</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Orbitron:wght@600;800&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="install-overlay" id="installPrompt" role="dialog" aria-modal="true" aria-labelledby="installTitle" hidden>
+  <section class="install-card">
+    <button class="install-close" id="installClose" aria-label="Close install prompt">×</button>
+    <div class="install-badge" aria-hidden="true">VG</div>
+    <span class="eyebrow">RESO VOXGUARD · PHONE APP</span>
+    <h2 id="installTitle">Keep your calls<br>one tap safer.</h2>
+    <p>Install Reso VoxGuard on your phone for quick access and a full-screen app experience.</p>
+    <button class="btn main install-action" id="installApp">Install app <span aria-hidden="true">＋</span></button>
+    <p class="install-message" id="installMessage" role="status" aria-live="polite"></p>
+    <button class="install-continue" id="installContinue">Continue in browser</button>
+    <small>Call scenarios are simulated demos, not model predictions. Real analysis needs a configured HTTPS API.</small>
+  </section>
+</div>
+<div class="splash" id="splash" role="status" aria-label="Loading Reso VoxGuard"><div class="splash-mark"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2l11 4v9c0 7-5 12-11 15C10 27 5 22 5 15V6z"/><path d="M9 16h3l2-5 3 10 2-5h4"/></svg></div><div class="splash-name">RESO <span>VOXGUARD</span></div><div class="splash-track"><i></i></div><small>SECURING THE SIGNAL</small></div>
+<div class="wrap">
+<header>
+  <div class="brand"><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2l11 4v9c0 7-5 12-11 15C10 27 5 22 5 15V6z" fill="var(--accent)"/><path d="M9 16h3l2-5 3 10 2-5h4" stroke="var(--onacc)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Reso VoxGuard</div>
+  <div class="tools"><span id="conn" class="pill">Checking backend…</span><button id="theme" class="icon-btn" aria-label="Switch to light theme" title="Switch theme"><svg id="themeIcon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg></button></div>
+</header>
+<section class="hero">
+  <h1>Is that voice real?</h1>
+  <p>Monitor a live call or upload a recording. Reso VoxGuard checks whether the voice was cloned and warns you before you act on it.</p>
+</section>
+<main class="grid">
+  <section class="panel">
+    <div class="tabs"><button id="tL" class="tab on">Live call monitor</button><button id="tU" class="tab">Upload recording</button></div>
+    <div id="pU" hidden>
+    <div class="drop" id="drop" tabindex="0" role="button"><b>Drop an audio file here</b><span>or click to choose a .wav or .mp3 file</span></div>
+    <input type="file" id="file" accept="audio/*" hidden>
+    <div class="row"><button class="btn" id="rec"><span id="recTxt">Record voice</span></button><button class="btn main" id="go" disabled>Analyze voice</button></div>
+    <label class="note" style="display:block;margin-top:10px"><input type="checkbox" id="phone"> Phone-quality test (8 kHz)</label>
+    <div id="player"><div class="waveBox"><canvas id="wave"></canvas></div><audio id="aud" controls></audio><canvas id="utl"></canvas></div>
+    </div>
+    <div id="pL">
+      <section class="call-session" id="callSession" data-state="ready" aria-labelledby="sessionTitle">
+        <div class="session-top"><div><span class="eyebrow">CALL SESSION</span><h2 id="sessionTitle">Voice link</h2></div><span id="sessionState" class="state-pill" data-state="ready"><i></i>Ready</span></div>
+        <p id="sessionHint" class="session-hint">Start a simulated in-app call to preview the answered → analyzing flow.</p>
+        <div class="call-visual"><div class="call-orbit orbit-a"></div><div class="call-orbit orbit-b"></div><div class="call-avatar">VG</div><div class="call-wave" id="callWave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+        <div class="session-actions"><button class="btn main" id="sessionStart">Start demo call</button><button class="btn" id="sessionEnd" disabled>End call</button></div>
+        <div class="session-steps" aria-label="Call status"><span data-step="ready" class="current">Ready</span><b></b><span data-step="ringing">Ringing</span><b></b><span data-step="answered">Answered</span><b></b><span data-step="ended">Ended</span></div>
+        <p class="demo-note">SIMULATED CALL PREVIEW · No real call or remote audio is connected</p>
+        <div class="scenario-guide" aria-live="polite"><b>Try each sensitivity</b><div><span>LOW</span><strong>Safe · ALLOW</strong></div><div><span>NORMAL</span><strong>Suspicious · STEP-UP MFA</strong></div><div><span>HIGH</span><strong>Danger · FREEZE</strong></div><small>Each run is a scripted simulation, not a model result.</small></div>
+      </section>
+      <p class="note">Microphone fallback: put the call on speakerphone and keep this page open. The browser sends about 4.04-second windows to the local VOXGUARD API. Browsers cannot read normal cellular call audio directly.</p>
+      <div class="row opt"><label>Source <select id="src"><option value="mic">Microphone</option><option value="tab">Browser tab audio</option></select></label><label>Sensitivity <select id="sens"><option value="70">Low</option><option value="60" selected>Normal</option><option value="50">High</option></select></label><label>Demo case <select id="demoCase"><option value="safe">Safe caller</option><option value="suspicious" selected>Suspicious voice</option><option value="spoof">Potential spoof</option></select></label></div>
+      <div class="row"><button class="btn main" id="liveBtn">Start call monitor</button><button class="btn" id="demoBtn">Run demo call</button></div>
+      <div class="meter"><i id="lvl"></i></div>
+      <div class="callbar"><span id="callTime">00:00</span><span id="callStat">Not monitoring</span></div>
+      <canvas id="trend"></canvas>
+      <div class="chips" id="chips"></div>
+      <div class="tr" id="tr" hidden></div>
+      <div class="ev"><b>Evidence log</b> <span id="evN">No entries yet</span><span class="badge">No raw audio stored</span><div class="row"><button class="btn sm" id="evV">Verify chain</button><button class="btn sm" id="evE">Export JSON</button></div></div>
+    </div>
+  </section>
+  <section class="panel res" id="res">
+    <div class="gauge"><svg viewBox="0 0 120 120" width="190" height="190"><circle class="g-bg" cx="60" cy="60" r="54"/><circle class="g-fg" id="fg" cx="60" cy="60" r="54"/></svg><div class="mid"><div class="pct" id="pct">0</div><small>risk indicator</small></div></div>
+    <div class="risk-scale" aria-label="Risk guide"><span>SAFE <b>0–30</b></span><i></i><span>STEP-UP <b>31–60</b></span><i></i><span>FREEZE <b>61–100</b></span></div>
+    <div class="verdict" id="verdict">Waiting for a sample</div>
+    <div class="sim" id="sim">Simulated result (demo call or backend offline)</div>
+    <div class="alert" role="alert"><b id="aT"></b><p id="aB"></p></div>
+    <div class="safe" id="sf"></div>
+    <div class="pol" id="pol"><span data-p="allow">ALLOW</span><span data-p="mfa">STEP-UP MFA</span><span data-p="freeze">FREEZE</span></div><p class="help" id="polTxt">Waiting for a call.</p>
+    <div class="acts"><button class="btn" id="wa">Alert trusted contact</button><button class="btn" id="rep">Save call report</button></div>
+    <p class="help">Help in India: call 1930 or report at cybercrime.gov.in</p>
+  </section>
+</main>
+<section class="lower">
+  <div><h2>Recent checks</h2><ul class="hist" id="hist"></ul></div>
+  <div><h2>How it works</h2><ol><li>Connect a supported call or add a voice clip.</li><li>The detector analyzes voice audio, including multilingual speech, and updates a rolling risk score from 0 to 100.</li><li>High risk shows an on-screen warning and an English spoken alert.</li></ol></div>
+</section>
+</div>
+<div class="toast" id="toast"></div>
+<script src="script.js"></script>
+</body>
+</html>

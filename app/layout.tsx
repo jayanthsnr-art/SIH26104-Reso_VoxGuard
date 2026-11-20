@@ -2,12 +2,12 @@ import type { Metadata, Viewport } from "next"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "VOXGUARD — Voice authenticity, at a glance",
-  description: "An experimental voice deepfake detection workspace for audio uploads and live microphone analysis.",
+  title: "Reso VoxGuard — AI Voice Clone Detector",
+  description: "Monitor a simulated call or upload a voice recording with Reso VoxGuard's experimental AI voice clone risk indicator."
 }
 
 export const viewport: Viewport = {
-  themeColor: "#091521",
+  themeColor: "#050506",
   width: "device-width",
   initialScale: 1,
 }

@@ -1,5 +1,5 @@
-import VoxGuardApp from "@/components/voxguard-app"
+import { redirect } from "next/navigation"
 
 export default function Home() {
-  return <VoxGuardApp />
+  redirect("/reso-voxguard/index.html")
 }
